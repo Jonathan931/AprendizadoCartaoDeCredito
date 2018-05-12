@@ -4,26 +4,36 @@ import pandas as pd;
 from sklearn import svm;
 
 def carregarDados():
-	dados = pd.read_csv('./dataset/creditcard.csv');
-	x = dados[
-	['Time',  'V1',  'V2',  'V3', 'V4',
-	   'V5',  'V6',  'V7',  'V8', 'V9', 
-	  'V10', 'V11', 'V12', 'V13', 'V14',
-	  'V15', 'V16', 'V17', 'V18', 'V19', 
-	  'V20', 'V21', 'V22', 'V23', 'V24',
-	  'V25', 'V26', 'V27', 'V28', 'Amount']];
-	y = dados[['Class']];
-	dados = pd.get_dummies(x);
-	resultados = pd.get_dummies(y);
-	return dados.values.ravel(), resultados.values.ravel();
+    dados = pd.read_csv('./dataset/creditcard.csv');
+
+    x = dados.drop('Class', axis=1)
+    y = dados.Class
+
+    return x, y;
+
 
 def main():
-	dados, resultados = carregarDados();
-	clf = svm.SVC();
-	clf.fit(dados, resultados);
-	SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0,
-    decision_function_shape='ovr', degree=3, gamma='auto', kernel='rbf',
-    max_iter=-1, probability=False, random_state=None, shrinking=True,
-    tol=0.001, verbose=False)
+    dados, resultados = carregarDados();
 
-main();
+    print( "Dados carregados...." )
+
+    from sklearn.model_selection import train_test_split
+    treino_dados, teste_dados, treino_resultados, teste_resultados = train_test_split(dados, resultados, test_size=0.1)
+
+    from sklearn.tree import DecisionTreeClassifier
+    #min_samples_leaf - Quantidade mínima de amostras necessárias para ser uma folha
+    #min_samples_split - Quantidade mínima de amostras necessárias para dividir um nó
+    clf = DecisionTreeClassifier(random_state=0, min_samples_leaf= 20, min_samples_split=50)
+
+    print("Iniciar treino....")
+
+    model = clf.fit(treino_dados, treino_resultados)
+
+    print("Treino concluido....")
+
+    valor = model.score(teste_dados, teste_resultados)
+    print( "Precisão por Árvore de Decisão: ", valor )
+
+
+if __name__ == '__main__': # chamada da funcao principal
+    main() # chamada da função main
